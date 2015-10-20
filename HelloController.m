@@ -29,9 +29,9 @@
 
 #pragma mark - Lifecycle
 
-//-(BOOL)prefersStatusBarHidden {
-//    return YES;
-//}
+-(BOOL)prefersStatusBarHidden {
+    return YES;
+}
 
 -(void)loadView {
     UIView *contentView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
