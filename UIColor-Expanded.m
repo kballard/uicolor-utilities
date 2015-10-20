@@ -447,12 +447,12 @@ static NSLock *colorNameCacheLock;
 	const NSUInteger kMaxComponents = 4;
 	CGFloat c[kMaxComponents];
 	NSUInteger i = 0;
-	if (![scanner scanFloat:&c[i++]]) return nil;
+	if (![scanner scanFloat:(float*)&c[i++]]) return nil;
 	while (1) {
 		if ([scanner scanString:@"}" intoString:NULL]) break;
 		if (i >= kMaxComponents) return nil;
 		if ([scanner scanString:@"," intoString:NULL]) {
-			if (![scanner scanFloat:&c[i++]]) return nil;
+			if (![scanner scanFloat:(float*)&c[i++]]) return nil;
 		} else {
 			// either we're at the end of there's an unexpected character here
 			// both cases are error conditions
@@ -516,8 +516,9 @@ static NSLock *colorNameCacheLock;
 	return colorNameCache;
 }
 
+    ///http://stackoverflow.com/a/33226560/4898050
 + (UIColor *)colorWithHue:(CGFloat)hue saturation:(CGFloat)saturation brightness:(CGFloat)brightness alpha:(CGFloat)alpha {
-	// Convert hsb to rgb
+        // Convert hsb to rgb
 	CGFloat r,g,b;
 	[self hue:hue saturation:saturation brightness:brightness toRed:&r green:&g blue:&b];
 	
