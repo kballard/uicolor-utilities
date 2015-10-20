@@ -376,7 +376,7 @@ static NSLock *colorNameCacheLock;
 		[colors addObject:[UIColor colorWithHue:h2 saturation:s brightness:v alpha:a]];
 	}
 	
-	return [[colors copy] autorelease];
+	return [colors copy];
 }
 
 #pragma mark String utilities
@@ -398,7 +398,7 @@ static NSLock *colorNameCacheLock;
 }
 
 - (NSString *)hexStringFromColor {
-	return [NSString stringWithFormat:@"%0.6X", self.rgbHex];
+	return [NSString stringWithFormat:@"%0.6X", (unsigned int)self.rgbHex];
 }
 
 - (NSString *)closestColorName {
@@ -436,7 +436,7 @@ static NSLock *colorNameCacheLock;
 	for (name = bestPos-1; *name != ','; --name)
 		;
 	++name;
-	NSString *result = [[[NSString alloc] initWithBytes:name length:bestPos - name encoding:NSUTF8StringEncoding] autorelease];
+	NSString *result = [[NSString alloc] initWithBytes:name length:bestPos - name encoding:NSUTF8StringEncoding];
 
 	return result;
 }
@@ -447,12 +447,12 @@ static NSLock *colorNameCacheLock;
 	const NSUInteger kMaxComponents = 4;
 	CGFloat c[kMaxComponents];
 	NSUInteger i = 0;
-	if (![scanner scanFloat:&c[i++]]) return nil;
+	if (![scanner scanFloat:(float*)&c[i++]]) return nil;
 	while (1) {
 		if ([scanner scanString:@"}" intoString:NULL]) break;
 		if (i >= kMaxComponents) return nil;
 		if ([scanner scanString:@"," intoString:NULL]) {
-			if (![scanner scanFloat:&c[i++]]) return nil;
+			if (![scanner scanFloat:(float*)&c[i++]]) return nil;
 		} else {
 			// either we're at the end of there's an unexpected character here
 			// both cases are error conditions
@@ -516,8 +516,9 @@ static NSLock *colorNameCacheLock;
 	return colorNameCache;
 }
 
+    ///http://stackoverflow.com/a/33226560/4898050
 + (UIColor *)colorWithHue:(CGFloat)hue saturation:(CGFloat)saturation brightness:(CGFloat)brightness alpha:(CGFloat)alpha {
-	// Convert hsb to rgb
+        // Convert hsb to rgb
 	CGFloat r,g,b;
 	[self hue:hue saturation:saturation brightness:brightness toRed:&r green:&g blue:&b];
 	
@@ -689,7 +690,7 @@ static const char *colorNameDB = ","
 + (void)populateColorNameCache {
 	NSAssert(colorNameCache == nil, @"+pouplateColorNameCache was called when colorNameCache was not nil");
 	NSMutableDictionary *cache = [NSMutableDictionary dictionary];
-	for (const char* entry = colorNameDB; entry = strchr(entry, ','); ) {
+	for (const char* entry = colorNameDB; (entry = strchr(entry, ',')); ) {
 		
 		// Step forward to the start of the name
 		++entry;
@@ -706,8 +707,7 @@ static const char *colorNameDB = ","
 		if (sscanf(++h, "%x%n", &hex, &increment) != 1) break;
 		[cache setObject:[self colorWithRGBHex:hex] forKey:name];
 		
-		// Cleanup and move to the next item
-		[name release];
+		// Move to the next item
 		entry = h + increment;
 	}
 	colorNameCache = [cache copy];
